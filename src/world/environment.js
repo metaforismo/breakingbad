@@ -5,7 +5,8 @@ import { makeRng } from '../utils/noise.js';
 import { cloudTexture, sunTexture } from '../utils/textures.js';
 import { WORLD_RADIUS } from './terrain.js';
 
-export const SUN_DIR = new THREE.Vector3(-0.45, 0.62, 0.34).normalize();
+// afternoon sun from the south-east so the street-facing facades are lit
+export const SUN_DIR = new THREE.Vector3(0.55, 0.6, -0.42).normalize();
 export const FOG_COLOR = 0xe9cfa5;
 
 export function createSky() {
@@ -57,7 +58,7 @@ export function createSky() {
     fog: false
   }));
   sun.position.copy(SUN_DIR).multiplyScalar(WORLD_RADIUS * 1.45);
-  sun.scale.setScalar(260);
+  sun.scale.setScalar(380);
   group.add(sun);
 
   return group;
@@ -82,7 +83,7 @@ export function createLights() {
   group.add(sun);
   group.add(sun.target);
 
-  const hemi = new THREE.HemisphereLight(0xbcd2ee, 0xcfa771, 0.5);
+  const hemi = new THREE.HemisphereLight(0xbcd2ee, 0xcfa771, 0.85);
   group.add(hemi);
 
   return { group, sun };
@@ -103,7 +104,7 @@ export function createClouds() {
   const group = new THREE.Group();
   const tex = cloudTexture();
   const clouds = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 14; i++) {
     const mat = new THREE.SpriteMaterial({
       map: tex,
       transparent: true,
@@ -113,9 +114,9 @@ export function createClouds() {
     });
     const c = new THREE.Sprite(mat);
     const a = rng() * Math.PI * 2;
-    const r = 350 + rng() * 700;
-    c.position.set(Math.cos(a) * r, 220 + rng() * 160, Math.sin(a) * r);
-    c.scale.set(260 + rng() * 280, 90 + rng() * 80, 1);
+    const r = 400 + rng() * 1000;
+    c.position.set(Math.cos(a) * r, 240 + rng() * 200, Math.sin(a) * r);
+    c.scale.set(300 + rng() * 320, 100 + rng() * 90, 1);
     c.userData.speed = 1.2 + rng() * 1.6;
     group.add(c);
     clouds.push(c);
@@ -138,10 +139,10 @@ export function createMesas() {
     flatShading: true
   });
 
-  for (let i = 0; i < 9; i++) {
-    const a = (i / 9) * Math.PI * 2 + rng() * 0.5;
-    const dist = 680 + rng() * 200;
-    const radius = 80 + rng() * 120;
+  for (let i = 0; i < 11; i++) {
+    const a = (i / 11) * Math.PI * 2 + rng() * 0.5;
+    const dist = 1050 + rng() * 250;
+    const radius = 110 + rng() * 160;
     const height = 32 + rng() * 42; // low and flat-topped, true mesa profile
     const geo = new THREE.CylinderGeometry(radius * (0.6 + rng() * 0.25), radius, height, 8, 2);
     const pos = geo.attributes.position;

@@ -68,12 +68,18 @@
       font-variant-numeric: tabular-nums;
     }
     #speedo span { font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.6); }
+    #vignette {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at center,
+        rgba(0,0,0,0) 58%, rgba(20,12,4,0.18) 82%, rgba(10,6,2,0.42) 100%);
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
 
   <div id="hud">
+    <div id="vignette"></div>
     <div id="crosshair"></div>
     <div id="prompt"></div>
     <div id="fps"></div>
@@ -92,8 +98,10 @@
     <div class="hint">Click to start</div>
     <div class="controls">
       <b>W A S D</b> move &nbsp;&nbsp; <b>Shift</b> run &nbsp;&nbsp; <b>Space</b> jump &nbsp;&nbsp; <b>Mouse</b> look<br/>
-      <b>E</b> enter / exit the RV &nbsp;&nbsp; <b>W / S</b> drive &nbsp;&nbsp; <b>A / D</b> steer &nbsp;&nbsp; <b>Esc</b> pause<br/><br/>
-      Visit the White residence on Negra Arroyo Lane, then find the RV cook site out in the dunes.
+      <b>E</b> enter / exit vehicles &nbsp;&nbsp; <b>W / S</b> drive &nbsp;&nbsp; <b>A / D</b> steer &nbsp;&nbsp; <b>Esc</b> pause<br/><br/>
+      Explore Albuquerque: the White residence and Jesse's place on Negra Arroyo Lane,<br/>
+      Los Pollos Hermanos, Saul's office, the A1A car wash and the laundry on Central Ave &mdash;<br/>
+      then take Walt's Aztek down the dirt track to the RV cook site in the Tohajiilee desert.
     </div>
     <div id="loading">Loading world&hellip;</div>
   </div>

@@ -7,7 +7,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeRng } from '../utils/noise.js';
 import { groundHeight, isReservedArea, WORLD_RADIUS } from './terrain.js';
 
-const SCATTER_RADIUS = 620; // keep props inside the fog-visible bubble
+const SCATTER_RADIUS = 1150; // keep props inside the fog-visible bubble
 
 function scatterTransforms(rng, count, { minScale, maxScale, sink = 0 }) {
   const out = [];
@@ -123,20 +123,20 @@ export function createVegetation() {
   const cactusMat = new THREE.MeshStandardMaterial({ color: 0x5d7d4b, roughness: 0.9 });
   group.add(buildInstanced(
     saguaroGeometry(), cactusMat,
-    scatterTransforms(rng, 170, { minScale: 0.55, maxScale: 1.5 })
+    scatterTransforms(rng, 320, { minScale: 0.55, maxScale: 1.5 })
   ));
 
   const rockMat = new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true });
   group.add(buildInstanced(
     rockGeometry(), rockMat,
-    scatterTransforms(rng, 400, { minScale: 0.25, maxScale: 2.4, sink: 0.25 }),
+    scatterTransforms(rng, 750, { minScale: 0.25, maxScale: 2.4, sink: 0.25 }),
     { tint: [0x8d7257, 0xa08566, 0x77614c, 0xb59a78], rng }
   ));
 
   const brushMat = new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true });
   const brush = buildInstanced(
     brushGeometry(), brushMat,
-    scatterTransforms(rng, 900, { minScale: 0.3, maxScale: 1.1, sink: 0.1 }),
+    scatterTransforms(rng, 1700, { minScale: 0.3, maxScale: 1.1, sink: 0.1 }),
     { castShadow: false, tint: [0x9a8a55, 0x7c8a4e, 0xb09f6a, 0x6f7d46], rng }
   );
   group.add(brush);

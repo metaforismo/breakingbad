@@ -197,6 +197,14 @@ export function createRV() {
 
   g.userData.wheels = wheels;
   g.userData.frontWheels = frontWheels;
+  g.userData.obb = { halfW: 1.45, halfL: 4.75 };
+  g.userData.drive = {
+    maxFwd: 23, maxRev: 6, accel: 7.5, brake: 16,
+    wheelbase: 5.3, wheelRadius: 0.43,
+    camDist: 11, camHeight: 4.8, lookHeight: 2.2,
+    collisionHalfL: 3.4, collisionR: 1.9,
+    label: 'RV'
+  };
   return g;
 }
 

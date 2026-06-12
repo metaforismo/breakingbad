@@ -25,7 +25,8 @@ export class Player {
     this.pitch = -0.05;
     this.onGround = true;
     this.colliders = [];
-    this.rv = null; // the RV group; collided as an oriented box
+    this.vehicles = []; // groups with userData.obb, collided as oriented boxes
+    this.activeVehicle = null; // skipped while being driven
     this._fwd = new THREE.Vector3();
     this._right = new THREE.Vector3();
   }
@@ -94,15 +95,16 @@ export class Player {
   resolveCollisions() {
     const p = this.position;
 
-    // RV: circle vs oriented box in the RV's local frame
-    if (this.rv) {
-      const heading = this.rv.rotation.y;
+    // vehicles: circle vs oriented box in each vehicle's local frame
+    for (const v of this.vehicles) {
+      if (v === this.activeVehicle) continue;
+      const heading = v.rotation.y;
       const cos = Math.cos(heading), sin = Math.sin(heading);
-      const dx = p.x - this.rv.position.x;
-      const dz = p.z - this.rv.position.z;
+      const dx = p.x - v.position.x;
+      const dz = p.z - v.position.z;
       const lx = dx * cos - dz * sin;
       const lz = dx * sin + dz * cos;
-      const halfW = 1.45, halfL = 4.75;
+      const { halfW, halfL } = v.userData.obb;
       const cx = THREE.MathUtils.clamp(lx, -halfW, halfW);
       const cz = THREE.MathUtils.clamp(lz, -halfL, halfL);
       const ox = lx - cx, oz = lz - cz;
