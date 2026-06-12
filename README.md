@@ -1,5 +1,7 @@
 # Breaking Bad — Albuquerque Explorer
 
+**▶ Play it: [metaforismo.github.io/breakingbad](https://metaforismo.github.io/breakingbad/)**
+
 A Three.js open-world fan game. Walk and drive through the iconic places of
 the series, rebuilt procedurally (no external assets — every texture is
 generated at runtime on canvas).
@@ -67,6 +69,15 @@ Tuned for 60 fps: instanced desert vegetation, merged geometries, a capped
 pixel ratio, a tight shadow frustum that follows the player, fog-limited draw
 distance and procedural canvas textures generated once at startup. An FPS
 meter sits in the top-right corner.
+
+## Deployment
+
+Every push to `main` runs the GitHub Actions workflow in
+`.github/workflows/deploy.yml`: it builds the site with Vite and publishes
+`dist/` to the `gh-pages` branch, which GitHub Pages serves at
+[metaforismo.github.io/breakingbad](https://metaforismo.github.io/breakingbad/).
+If the URL ever shows a 404, set **Settings → Pages → Source: Deploy from a
+branch → `gh-pages` / (root)** once.
 
 ## Dev scripts
 
