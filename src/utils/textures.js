@@ -49,9 +49,9 @@ export function sandTexture(repeat = [340, 340]) {
   return makeTexture(512, (ctx, s) => {
     ctx.fillStyle = '#d4b078';
     ctx.fillRect(0, 0, s, s);
-    blotches(ctx, s, rng, 26, 'rgba(173, 132, 80, 1)', 180);
-    blotches(ctx, s, rng, 20, 'rgba(232, 203, 150, 1)', 140);
-    speckle(ctx, s, rng, 9000, ['#a8804e', '#e8d2a0', '#bf9259', '#8f6a3e'], 0.4, 1.3);
+    // fine grain only — any larger feature in a tile repeated 340x reads as
+    // a grid; the dunes get their large-scale variation from vertex colors
+    speckle(ctx, s, rng, 11000, ['#a8804e', '#e8d2a0', '#bf9259', '#8f6a3e'], 0.4, 1.2);
   }, { repeat });
 }
 
@@ -332,12 +332,24 @@ export function cloudTexture() {
   const rng = makeRng(112);
   return makeTexture(256, (ctx, s) => {
     ctx.clearRect(0, 0, s, s);
-    for (let i = 0; i < 26; i++) {
+    // shaded undersides first, bright puffs above: reads as cumulus
+    for (let i = 0; i < 18; i++) {
       const x = s * 0.5 + (rng() - 0.5) * s * 0.6;
-      const y = s * 0.55 + (rng() - 0.5) * s * 0.3;
-      const r = s * (0.08 + rng() * 0.12);
+      const y = s * 0.62 + (rng() - 0.5) * s * 0.2;
+      const r = s * (0.07 + rng() * 0.11);
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, 'rgba(255,255,255,0.55)');
+      g.addColorStop(0, 'rgba(205, 198, 196, 0.4)');
+      g.addColorStop(1, 'rgba(205, 198, 196, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    for (let i = 0; i < 24; i++) {
+      const x = s * 0.5 + (rng() - 0.5) * s * 0.58;
+      const y = s * 0.48 + (rng() - 0.5) * s * 0.24;
+      const r = s * (0.07 + rng() * 0.12);
+      const g = ctx.createRadialGradient(x - r * 0.2, y - r * 0.3, 0, x, y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0.65)');
+      g.addColorStop(0.6, 'rgba(252, 250, 246, 0.3)');
       g.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g;
       ctx.fillRect(x - r, y - r, r * 2, r * 2);
@@ -506,4 +518,209 @@ export function carWashWallTexture() {
     ctx.font = 'bold 44px Arial';
     ctx.fillText('CAR WASH', s / 2, 150);
   }, { w: 512, h: 170 });
+}
+
+// ------------------------------------------------------------- interiors
+export function woodFloorTexture(repeat = [4, 4]) {
+  const rng = makeRng(120);
+  return makeTexture(256, (ctx, s) => {
+    ctx.fillStyle = '#9c7448';
+    ctx.fillRect(0, 0, s, s);
+    const plank = s / 8;
+    for (let r = 0; r < 8; r++) {
+      const off = (r % 2) * plank * 1.5;
+      for (let c = -1; c < 4; c++) {
+        const t = rng() * 30 - 15;
+        ctx.fillStyle = `rgb(${156 + t | 0}, ${116 + t * 0.8 | 0}, ${72 + t * 0.6 | 0})`;
+        ctx.fillRect(c * plank * 3 + off + 1, r * plank + 1, plank * 3 - 2, plank - 2);
+      }
+    }
+    for (let i = 0; i < 60; i++) {
+      ctx.strokeStyle = `rgba(90, 60, 30, ${0.1 + rng() * 0.2})`;
+      ctx.lineWidth = 1;
+      const y = rng() * s;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.bezierCurveTo(s * 0.3, y + (rng() - 0.5) * 6, s * 0.7, y + (rng() - 0.5) * 6, s, y);
+      ctx.stroke();
+    }
+  }, { repeat });
+}
+
+export function checkerTileTexture(repeat = [6, 4]) {
+  const rng = makeRng(121);
+  return makeTexture(256, (ctx, s) => {
+    const n = 4, c = s / n;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        ctx.fillStyle = (i + j) % 2 ? '#c8b89a' : '#a3402e';
+        ctx.fillRect(i * c, j * c, c, c);
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(i * c, j * c, c, c);
+      }
+    }
+    speckle(ctx, s, rng, 800, ['rgba(255,255,255,0.25)', 'rgba(0,0,0,0.2)'], 0.3, 1);
+  }, { repeat });
+}
+
+export function epoxyFloorTexture(repeat = [6, 4]) {
+  const rng = makeRng(122);
+  return makeTexture(256, (ctx, s) => {
+    ctx.fillStyle = '#7e2c20';
+    ctx.fillRect(0, 0, s, s);
+    blotches(ctx, s, rng, 16, 'rgba(120, 50, 38, 1)', 90);
+    blotches(ctx, s, rng, 10, 'rgba(60, 22, 16, 1)', 70);
+    speckle(ctx, s, rng, 1200, ['rgba(255,255,255,0.12)', 'rgba(0,0,0,0.25)'], 0.3, 0.9);
+  }, { repeat });
+}
+
+export function hazardStripeTexture(repeat = [6, 1]) {
+  return makeTexture(128, (ctx, s) => {
+    ctx.fillStyle = '#e8c12c';
+    ctx.fillRect(0, 0, s, s);
+    ctx.fillStyle = '#1a1a1a';
+    for (let i = -1; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * s / 2, s);
+      ctx.lineTo(i * s / 2 + s / 2, 0);
+      ctx.lineTo(i * s / 2 + s * 0.75, 0);
+      ctx.lineTo(i * s / 2 + s / 4, s);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }, { repeat });
+}
+
+export function menuBoardTexture() {
+  return makeTexture(512, (ctx, s, h) => {
+    ctx.fillStyle = '#2e2520';
+    ctx.fillRect(0, 0, s, h);
+    ctx.fillStyle = '#f2c12e';
+    ctx.fillRect(0, 0, s, 54);
+    ctx.fillStyle = '#a33d2b';
+    ctx.font = 'bold 34px Georgia';
+    ctx.textAlign = 'center';
+    ctx.fillText('LOS POLLOS HERMANOS', s / 2, 38);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#f3ead8';
+    ctx.font = '24px Georgia';
+    const items = [
+      ['Pollos Classic', '$4.99'], ['Spicy Curly Fries', '$2.49'],
+      ['Hermanos Combo', '$7.99'], ['Pollos Burrito', '$5.49'],
+      ['Cherry Limeade', '$1.99'], ['Family Bucket', '$12.99']
+    ];
+    items.forEach(([name, price], i) => {
+      const col = i % 2, row = (i - col) / 2;
+      ctx.fillText(name, 30 + col * 250, 100 + row * 44);
+      ctx.fillStyle = '#f2c12e';
+      ctx.fillText(price, 180 + col * 250, 100 + row * 44);
+      ctx.fillStyle = '#f3ead8';
+    });
+  }, { w: 512, h: 256 });
+}
+
+export function motelSignTexture() {
+  return makeTexture(512, (ctx, s, h) => {
+    ctx.fillStyle = '#1d3f66';
+    ctx.fillRect(0, 0, s, h);
+    ctx.fillStyle = '#e8762c';
+    ctx.fillRect(0, 0, s, 96);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 56px Arial';
+    ctx.fillText('CROSSROADS', s / 2, 64);
+    ctx.font = 'bold 72px Arial';
+    ctx.fillStyle = '#f2d12e';
+    ctx.fillText('MOTEL', s / 2, 178);
+    ctx.font = '30px Arial';
+    ctx.fillStyle = '#cfe3f5';
+    ctx.fillText('VACANCY  ·  FREE HBO', s / 2, 228);
+  }, { w: 512, h: 256 });
+}
+
+export function dogHouseSignTexture() {
+  return makeTexture(512, (ctx, s, h) => {
+    ctx.fillStyle = '#f5efdf';
+    ctx.fillRect(0, 0, s, h);
+    ctx.strokeStyle = '#b02418';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(8, 8, s - 16, h - 16);
+    // the dachshund
+    ctx.fillStyle = '#c42818';
+    ctx.beginPath();
+    ctx.ellipse(s / 2, 120, 150, 44, 0, 0, Math.PI * 2); // body
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(s / 2 + 160, 86, 34, 0, Math.PI * 2); // head
+    ctx.fill();
+    ctx.beginPath(); // snout
+    ctx.ellipse(s / 2 + 196, 92, 28, 14, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath(); // ear
+    ctx.ellipse(s / 2 + 150, 102, 12, 24, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath(); // tail up
+    ctx.moveTo(s / 2 - 145, 96);
+    ctx.quadraticCurveTo(s / 2 - 185, 40, s / 2 - 158, 30);
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = '#c42818';
+    ctx.stroke();
+    for (const lx of [-95, -40, 45, 100]) { // legs
+      ctx.fillRect(s / 2 + lx, 150, 16, 46);
+    }
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#b02418';
+    ctx.font = 'italic bold 52px Georgia';
+    ctx.fillText('the DOG HOUSE', s / 2, 236);
+  }, { w: 512, h: 256 });
+}
+
+/** Warm glowing pane standing in for sunlit blinds, seen from inside. */
+export function windowGlowTexture() {
+  return makeTexture(128, (ctx, s) => {
+    const g = ctx.createLinearGradient(0, 0, 0, s);
+    g.addColorStop(0, '#fff3d8');
+    g.addColorStop(0.5, '#ffe9bd');
+    g.addColorStop(1, '#f5d9a8');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, s, s);
+    ctx.strokeStyle = 'rgba(120, 90, 50, 0.35)';
+    ctx.lineWidth = 3;
+    for (let y = 8; y < s; y += 12) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(s, y);
+      ctx.stroke();
+    }
+  });
+}
+
+/** Soft rectangular gradient used as cheap ambient occlusion under buildings. */
+export function rectShadowTexture() {
+  return makeTexture(256, (ctx, s) => {
+    ctx.clearRect(0, 0, s, s);
+    const m = 70;
+    const g = (x0, y0, x1, y1) => {
+      const grad = ctx.createLinearGradient(x0, y0, x1, y1);
+      grad.addColorStop(0, 'rgba(0,0,0,0.38)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      return grad;
+    };
+    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.fillRect(m, m, s - m * 2, s - m * 2);
+    ctx.fillStyle = g(0, m, 0, 0); ctx.fillRect(m, 0, s - m * 2, m);
+    ctx.fillStyle = g(0, s - m, 0, s); ctx.fillRect(m, s - m, s - m * 2, m);
+    ctx.fillStyle = g(m, 0, 0, 0); ctx.fillRect(0, m, m, s - m * 2);
+    ctx.fillStyle = g(s - m, 0, s, 0); ctx.fillRect(s - m, m, m, s - m * 2);
+    // corners
+    for (const [cx, cy] of [[m, m], [s - m, m], [m, s - m], [s - m, s - m]]) {
+      const rad = ctx.createRadialGradient(cx, cy, 0, cx, cy, m);
+      rad.addColorStop(0, 'rgba(0,0,0,0.38)');
+      rad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rad;
+      const x0 = cx === m ? 0 : s - m, y0 = cy === m ? 0 : s - m;
+      ctx.fillRect(x0, y0, m, m);
+    }
+  });
 }

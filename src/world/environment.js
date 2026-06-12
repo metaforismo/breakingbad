@@ -67,11 +67,11 @@ export function createSky() {
 export function createLights() {
   const group = new THREE.Group();
 
-  const sun = new THREE.DirectionalLight(0xfff0d6, 3.2);
+  const sun = new THREE.DirectionalLight(0xfff0d6, 3.4);
   sun.position.copy(SUN_DIR).multiplyScalar(160);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  const ext = 95; // tight ortho box that follows the player
+  const ext = 78; // tight ortho box that follows the player
   sun.shadow.camera.left = -ext;
   sun.shadow.camera.right = ext;
   sun.shadow.camera.top = ext;
@@ -79,11 +79,11 @@ export function createLights() {
   sun.shadow.camera.near = 10;
   sun.shadow.camera.far = 420;
   sun.shadow.bias = -0.0004;
-  sun.shadow.normalBias = 0.4;
+  sun.shadow.normalBias = 0.3;
   group.add(sun);
   group.add(sun.target);
 
-  const hemi = new THREE.HemisphereLight(0xbcd2ee, 0xcfa771, 0.85);
+  const hemi = new THREE.HemisphereLight(0xbcd2ee, 0xcfa771, 0.75);
   group.add(hemi);
 
   return { group, sun };

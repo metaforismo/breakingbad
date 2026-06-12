@@ -26,6 +26,7 @@ export const CONN_ROAD_X = 130;
 // dirt track to the cook site, runs along z
 export const DIRT_ROAD_X = -500;
 export const RV_SITE = { x: -500, z: -460 };
+export const MONEY_SITE = { x: -780, z: -590 };
 
 // flat town pad
 export const TOWN = { minX: -270, maxX: 580, minZ: -170, maxZ: 130 };
@@ -73,6 +74,7 @@ export function isReservedArea(x, z) {
   if (Math.abs(z - MAIN_ROAD_Z) < 16) return true;
   if (z < MAIN_ROAD_Z && z > RV_SITE.z - 30 && Math.abs(x - DIRT_ROAD_X) < 16) return true;
   if (Math.hypot(x - RV_SITE.x, z - RV_SITE.z) < 32) return true;
+  if (Math.hypot(x - MONEY_SITE.x, z - MONEY_SITE.z) < 18) return true;
   return false;
 }
 

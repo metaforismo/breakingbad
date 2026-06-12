@@ -9,8 +9,12 @@ import * as THREE from 'three';
 import {
   stuccoTexture, stuccoBumpTexture, shingleTexture, brickTexture,
   concreteTexture, garageDoorTexture, pizzaTexture, waterBumpTexture,
-  riverRockTexture, foliageTexture
+  riverRockTexture, foliageTexture, woodFloorTexture
 } from '../utils/textures.js';
+import {
+  wallWithGap, glowWindow, contactShadow, couch, coffeeTable, tvUnit,
+  diningSet, kitchenCounter, whiteGoodsMat, blackMat
+} from './furniture.js';
 
 // ---- shared materials -------------------------------------------------
 const creamStucco = new THREE.MeshStandardMaterial({
@@ -126,14 +130,149 @@ export function createWhiteHouse(ox, oz, flip = false) {
     );
   };
 
-  // ---- volumes: living wing left, garage jutting forward right ----------
-  const living = box(13, 3.0, 10, creamStucco, -7, 1.5, -1);
-  g.add(living);
-  addCollider(-13.5, -6, -0.5, 4);
+  // ---- volumes: hollow living wing (walk inside!), solid garage ----------
+  // walls with a real opening at the front door and the rear slider
+  const LIVING_H = 3.0;
+  wallWithGap(g, addCollider, creamStucco, {
+    axis: 'x', from: -13.5, to: -0.5, at: 3.87, h: LIVING_H,
+    gapCenter: -2.1, gapWidth: 1.2, gapHeight: 2.15
+  });
+  wallWithGap(g, addCollider, creamStucco, {
+    axis: 'x', from: -13.5, to: -0.5, at: -5.87, h: LIVING_H,
+    gapCenter: -4.5, gapWidth: 1.5, gapHeight: 2.05 // sliding door to the pool
+  });
+  wallWithGap(g, addCollider, creamStucco, {
+    axis: 'z', from: -6, to: 4, at: -13.37, h: LIVING_H
+  });
+  wallWithGap(g, addCollider, creamStucco, {
+    axis: 'z', from: -6, to: 4, at: -0.63, h: LIVING_H
+  });
 
   const garage = box(7, 2.9, 11.5, creamStucco, 3, 1.45, 1.75);
   g.add(garage);
   addCollider(-0.5, -4, 6.5, 7.5);
+
+  // contact AO under both volumes
+  g.add(contactShadow(13, 10, -7, -1));
+  g.add(contactShadow(7, 11.5, 3, 1.75));
+
+  // ---- living-wing interior ------------------------------------------------
+  const floorMat = new THREE.MeshStandardMaterial({ map: woodFloorTexture([5, 4]), roughness: 0.7 });
+  g.add(box(12.9, 0.1, 9.9, floorMat, -7, 0.0, -1, { shadow: false }));
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0xe6e0d2, roughness: 0.95 });
+  g.add(box(12.9, 0.12, 9.9, ceilMat, -7, 2.66, -1, { shadow: false }));
+
+  // warm interior wall paint on thin liners just inside the shell; the
+  // door/slider gaps are cut through them too (no colliders for liners)
+  const paintMat = new THREE.MeshStandardMaterial({ color: 0xd9c9a4, roughness: 0.95 });
+  const noCollide = () => {};
+  wallWithGap(g, noCollide, paintMat, {
+    axis: 'x', from: -13.4, to: -0.6, at: 3.7, h: 2.62, t: 0.04,
+    gapCenter: -2.1, gapWidth: 1.3, gapHeight: 2.2
+  });
+  wallWithGap(g, noCollide, paintMat, {
+    axis: 'x', from: -13.4, to: -0.6, at: -5.7, h: 2.62, t: 0.04,
+    gapCenter: -4.5, gapWidth: 1.6, gapHeight: 2.1
+  });
+  g.add(box(0.04, 2.62, 9.8, paintMat, -13.2, 1.31, -1, { shadow: false }));
+  g.add(box(0.04, 2.62, 9.8, paintMat, -0.8, 1.31, -1, { shadow: false }));
+
+  // living room: couch + coffee table + TV against the west wall
+  const rug = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.4, 2.5),
+    new THREE.MeshStandardMaterial({ color: 0x7d5f46, roughness: 1 })
+  );
+  rug.rotation.x = -Math.PI / 2;
+  rug.position.set(-11, 0.07, 0.8);
+  rug.receiveShadow = true;
+  g.add(rug);
+
+  const sofa = couch(2.3);
+  sofa.position.set(-9.9, 0.06, 0.8);
+  sofa.rotation.y = -Math.PI / 2;
+  g.add(sofa);
+  addCollider(-10.45, -0.4, -9.35, 2.0, 1);
+  const ct = coffeeTable();
+  ct.position.set(-11.4, 0.06, 0.8);
+  ct.rotation.y = Math.PI / 2;
+  g.add(ct);
+  const tv = tvUnit();
+  tv.position.set(-12.75, 0.06, 0.8);
+  tv.rotation.y = Math.PI / 2;
+  g.add(tv);
+  addCollider(-13.1, 0.05, -12.4, 1.55, 1);
+
+  // dining table between the living room and kitchen
+  const dining = diningSet();
+  dining.position.set(-6.6, 0.06, 1.1);
+  g.add(dining);
+  addCollider(-7.7, 0.0, -5.5, 2.2, 1);
+
+  // kitchen run along the back wall + island (Walt's breakfast spot)
+  const cabMat = new THREE.MeshStandardMaterial({ color: 0x8a6840, roughness: 0.7 });
+  const counterTopMat = new THREE.MeshStandardMaterial({ color: 0xd8d2c4, roughness: 0.35 });
+  const counterRun = kitchenCounter(3.8, cabMat, counterTopMat);
+  counterRun.position.set(-3.4, 0.06, -5.32);
+  g.add(counterRun);
+  addCollider(-5.3, -5.7, -1.5, -4.95, 1.1);
+  const cooktop = box(0.9, 0.02, 0.5, blackMat, -4.2, 0.97, -5.32, { shadow: false });
+  g.add(cooktop);
+  const fridge = box(0.78, 1.82, 0.72, whiteGoodsMat, -1.15, 0.97, -5.25);
+  g.add(fridge);
+  addCollider(-1.55, -5.65, -0.75, -4.85, 2);
+  const island = kitchenCounter(1.9, cabMat, counterTopMat);
+  island.position.set(-3.4, 0.06, -3.2);
+  g.add(island);
+  addCollider(-4.35, -3.55, -2.45, -2.85, 1.1);
+
+  // Heisenberg's pork-pie hat on the island
+  const hatMat = new THREE.MeshStandardMaterial({ color: 0x16140f, roughness: 0.85 });
+  const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.02, 18), hatMat);
+  hatBrim.position.set(-3.0, 0.98, -3.2);
+  hatBrim.castShadow = true;
+  g.add(hatBrim);
+  const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.145, 0.13, 16), hatMat);
+  hatTop.position.set(-3.0, 1.05, -3.2);
+  g.add(hatTop);
+
+  // glowing window panes seen from indoors (sunlit blinds)
+  for (const [gx2, gw2, gh2] of [[-9.5, 2.9, 1.4], [-5.6, 1.7, 1.3]]) {
+    const glow = glowWindow(gw2, gh2);
+    glow.position.set(gx2, 1.7, 3.66);
+    glow.rotation.y = Math.PI;
+    g.add(glow);
+  }
+  const backGlow = glowWindow(1.8, 1.25);
+  backGlow.position.set(-10, 1.7, -5.64);
+  g.add(backGlow);
+  for (const wz of [-3.5, 0.8]) {
+    const glow = glowWindow(1.5, 1.15);
+    glow.position.set(-13.14, 1.7, wz);
+    glow.rotation.y = Math.PI / 2;
+    g.add(glow);
+  }
+
+  // dark doorway suggesting the bedroom hallway
+  const hallway = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.0, 2.05),
+    new THREE.MeshStandardMaterial({ color: 0x171310, roughness: 1 })
+  );
+  hallway.position.set(-12.0, 1.03, -5.63);
+  g.add(hallway);
+
+  // warm room lights: one over the living area, one over the kitchen
+  const roomLight = new THREE.PointLight(0xffe3c0, 16, 14, 1.8);
+  roomLight.position.set(-9, 2.3, 0);
+  g.add(roomLight);
+  const kitchenLight = new THREE.PointLight(0xffe3c0, 12, 11, 1.8);
+  kitchenLight.position.set(-3, 2.3, -3.5);
+  g.add(kitchenLight);
+  const dome = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16, 10, 6, 0, Math.PI * 2, Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0xfff2da })
+  );
+  dome.position.set(-7, 2.6, -1);
+  g.add(dome);
 
   // ---- roofs (brown shingles, generous overhangs) ------------------------
   const livingRoof = hipRoof(14.6, 11.6, 2.0);
@@ -160,8 +299,13 @@ export function createWhiteHouse(ox, oz, flip = false) {
   g.add(box(3.6, 0.16, 3.0, trimMat, -2.1, 2.62, 5.4));
   g.add(box(0.14, 2.55, 0.14, trimMat, -3.7, 1.3, 6.7));
   g.add(box(0.14, 2.55, 0.14, trimMat, -0.6, 1.3, 6.7));
-  // front door (set into the living wing's front wall)
-  g.add(box(1.05, 2.1, 0.1, darkWoodMat, -2.1, 1.05, 4.02));
+  // front door, standing ajar so you can walk in
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(-2.68, 0, 3.92);
+  const doorPanel = box(1.08, 2.1, 0.06, darkWoodMat, 0.54, 1.05, 0);
+  doorPivot.add(doorPanel);
+  doorPivot.rotation.y = -1.0;
+  g.add(doorPivot);
   g.add(box(1.35, 0.14, 0.16, maroonMat, -2.1, 2.2, 4.05));
   g.add(box(0.12, 2.26, 0.16, maroonMat, -2.85, 1.13, 4.05));
   g.add(box(0.12, 2.26, 0.16, maroonMat, -1.35, 1.13, 4.05));

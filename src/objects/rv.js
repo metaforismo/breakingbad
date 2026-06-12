@@ -304,3 +304,55 @@ export function createCampsite(x, z) {
 
   return g;
 }
+
+// ---- the money burial site (bring a shovel and the coordinates) -------------
+export function createMoneyPit(x, z, groundHeight) {
+  const g = new THREE.Group();
+  const y = groundHeight(x, z);
+
+  // freshly turned dirt mound + the open pit
+  const dirtMat = new THREE.MeshStandardMaterial({ color: 0x7a5c3a, roughness: 1, flatShading: true });
+  const mound = new THREE.Mesh(new THREE.SphereGeometry(1.6, 12, 8), dirtMat);
+  mound.scale.set(1.3, 0.36, 1);
+  mound.position.set(x - 2.2, y + 0.1, z);
+  mound.castShadow = true;
+  g.add(mound);
+  const pit = new THREE.Mesh(
+    new THREE.CircleGeometry(1.5, 18),
+    new THREE.MeshStandardMaterial({ color: 0x17110a, roughness: 1 })
+  );
+  pit.rotation.x = -Math.PI / 2;
+  pit.position.set(x + 0.6, y + 0.04, z);
+  g.add(pit);
+
+  // black money barrels, two still half-sunk
+  const drumMat = new THREE.MeshStandardMaterial({ color: 0x1e2022, roughness: 0.55, metalness: 0.3 });
+  for (const [bx, bz, sink, lean] of [
+    [x + 0.2, z - 0.4, 0.55, 0.1], [x + 1.1, z + 0.5, 0.6, -0.15], [x + 2.6, z - 1.2, 0, 0.05]
+  ]) {
+    const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.92, 14), drumMat);
+    drum.position.set(bx, y + 0.52 - sink, bz);
+    drum.rotation.z = lean;
+    drum.castShadow = true;
+    g.add(drum);
+  }
+
+  // shovel stuck in the mound
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.025, 0.025, 1.3, 8),
+    new THREE.MeshStandardMaterial({ color: 0x8a6a44, roughness: 0.9 })
+  );
+  shaft.position.set(x - 2.2, y + 0.95, z + 0.3);
+  shaft.rotation.z = 0.35;
+  shaft.castShadow = true;
+  g.add(shaft);
+  const blade = new THREE.Mesh(
+    new THREE.ConeGeometry(0.16, 0.36, 4),
+    new THREE.MeshStandardMaterial({ color: 0x4a4e54, metalness: 0.7, roughness: 0.4 })
+  );
+  blade.position.set(x - 2.43, y + 0.32, z + 0.3);
+  blade.rotation.z = Math.PI + 0.35;
+  g.add(blade);
+
+  return g;
+}

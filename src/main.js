@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createTerrain, createRoads, groundHeight, RV_SITE } from './world/terrain.js';
+import { createTerrain, createRoads, groundHeight, RV_SITE, MONEY_SITE } from './world/terrain.js';
 import {
   createSky, createLights, createClouds, createMesas,
   updateShadowTarget, FOG_COLOR
@@ -8,7 +8,7 @@ import { createVegetation, createTumbleweeds } from './world/vegetation.js';
 import { createNeighborhood } from './world/neighborhood.js';
 import { createCommercialStrip } from './world/commercial.js';
 import { createWhiteHouse } from './objects/house.js';
-import { createRV, createCampsite } from './objects/rv.js';
+import { createRV, createCampsite, createMoneyPit } from './objects/rv.js';
 import { carPresets } from './objects/cars.js';
 import { Player, keys } from './player/player.js';
 import { Vehicle } from './player/vehicle.js';
@@ -69,6 +69,7 @@ rv.position.set(RV_SITE.x, 0, RV_SITE.z);
 rv.rotation.y = 0.55;
 scene.add(rv);
 scene.add(createCampsite(RV_SITE.x, RV_SITE.z));
+scene.add(createMoneyPit(MONEY_SITE.x, MONEY_SITE.z, groundHeight));
 
 // Walt's Aztek and Skyler's Wagoneer on the driveway (as in the pizza scene)
 const wagoneer = carPresets.wagoneer();
@@ -168,10 +169,14 @@ window.addEventListener('keydown', (e) => {
 const ZONES = [
   { x: HOUSE.x, z: HOUSE.z - 8, r: 38, label: '308 Negra Arroyo Lane' },
   { x: -185, z: -86, r: 26, label: "Jesse Pinkman's House" },
+  { x: 145, z: -86, r: 26, label: 'The Schrader Residence' },
   { x: 70, z: 64, r: 42, label: 'Saul Goodman & Associates' },
   { x: 210, z: 60, r: 45, label: 'Los Pollos Hermanos' },
   { x: 355, z: 60, r: 38, label: 'A1A Car Wash' },
   { x: 480, z: 80, r: 50, label: 'Lavandería Brillante' },
+  { x: -170, z: 60, r: 40, label: 'Crossroads Motel' },
+  { x: -85, z: 56, r: 30, label: 'The Dog House' },
+  { x: MONEY_SITE.x, z: MONEY_SITE.z, r: 30, label: 'N 34° 59\' 20" — W 106° 36\' 52"' },
   { x: RV_SITE.x, z: RV_SITE.z, r: 60, label: 'The Cook Site — Tohajiilee' }
 ];
 function locationLabel(p) {

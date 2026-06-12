@@ -8,9 +8,12 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeRng } from '../utils/noise.js';
 import {
   stuccoTexture, stuccoBumpTexture, shingleTexture, brickTexture,
-  concreteTexture, garageDoorTexture, lawnTexture, streetSignTexture
+  concreteTexture, garageDoorTexture, lawnTexture, streetSignTexture,
+  riverRockTexture
 } from '../utils/textures.js';
 import { hipRoof } from '../objects/house.js';
+import { contactShadow } from '../objects/furniture.js';
+import { createCar } from '../objects/cars.js';
 import {
   RES_ROAD_Z, MAIN_ROAD_Z, RES_ROAD_X_MIN, RES_ROAD_X_MAX, CONN_ROAD_X, TOWN
 } from './terrain.js';
@@ -119,6 +122,71 @@ function ranchHouse(rng, { stucco, dark, shinglePalette, doorColor, garageRight 
   return g;
 }
 
+/** Hank & Marie's place: stone wainscot, purple accents everywhere. */
+function schraderHouse() {
+  const g = new THREE.Group();
+  const wallMat = new THREE.MeshStandardMaterial({
+    map: stuccoTexture('#ded4c2', '196, 184, 162'), bumpMap: bumpTex, bumpScale: 0.3, roughness: 0.95
+  });
+  const roofMat = new THREE.MeshStandardMaterial({ map: shingleTexture('gray'), roughness: 0.9 });
+  const stoneMat = new THREE.MeshStandardMaterial({ map: riverRockTexture([3, 1]), roughness: 1 });
+  const purpleMat = new THREE.MeshStandardMaterial({ color: 0x5b3a78, roughness: 0.6 });
+
+  const W = 15, D = 9.5, H = 3.2;
+  g.add(box(W, H, D, wallMat, 0, H / 2, 0));
+  g.add(box(W + 0.14, 1.1, D + 0.14, stoneMat, 0, 0.55, 0)); // stone wainscot
+  const roof = hipRoof(W + 1.8, D + 1.6, 2.0, roofMat);
+  roof.position.set(0, H, 0);
+  g.add(roof);
+  g.add(box(W + 1.9, 0.18, D + 1.7, trimWhite, 0, H - 0.04, 0, false));
+  g.add(contactShadow(W, D, 0, 0));
+
+  // purple front door under a small gable + purple shutters
+  g.add(box(1.1, 2.1, 0.1, purpleMat, -1.5, 1.05, D / 2 + 0.02));
+  g.add(box(1.5, 0.14, 0.2, purpleMat, -1.5, 2.2, D / 2 + 0.06, false));
+  for (const wx of [-5, 2.4, 5.2]) {
+    simpleWindow(g, 1.7, 1.3, wx, 1.8, D / 2 + 0.02);
+    g.add(box(0.3, 1.45, 0.05, purpleMat, wx - 1.05, 1.8, D / 2 + 0.03, false));
+    g.add(box(0.3, 1.45, 0.05, purpleMat, wx + 1.05, 1.8, D / 2 + 0.03, false));
+  }
+  // Hank's grill on the side patio
+  const grill = new THREE.Group();
+  const kettle = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 8),
+    new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.4, metalness: 0.5 }));
+  kettle.position.y = 0.75;
+  kettle.castShadow = true;
+  grill.add(kettle);
+  for (const a of [0, 2.1, 4.2]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.6, 6),
+      new THREE.MeshStandardMaterial({ color: 0x3a3a3a, metalness: 0.6 }));
+    leg.position.set(Math.cos(a) * 0.2, 0.3, Math.sin(a) * 0.2);
+    grill.add(leg);
+  }
+  grill.position.set(W / 2 + 1.6, 0, -1);
+  g.add(grill);
+
+  // lawn + driveway
+  const lawn = new THREE.Mesh(new THREE.PlaneGeometry(W + 7, 13.5), lawnMat);
+  lawn.rotation.x = -Math.PI / 2;
+  lawn.position.set(0, 0.04, D / 2 + 7);
+  lawn.receiveShadow = true;
+  g.add(lawn);
+  const drive = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 12.5), driveMat);
+  drive.rotation.x = -Math.PI / 2;
+  drive.position.set(5.2, 0.06, D / 2 + 6.6);
+  drive.receiveShadow = true;
+  g.add(drive);
+  // Hank's big black SUV
+  const suv = createCar({ type: 'suv', color: 0x1d1f22 });
+  suv.position.set(5.2, 0, D / 2 + 4.4);
+  suv.rotation.y = Math.PI + 0.03;
+  g.add(suv);
+
+  g.userData.halfW = W / 2 + 0.4;
+  g.userData.halfD = D / 2 + 0.4;
+  return g;
+}
+
 /** Jesse's place: two-story with brick base and a columned porch. */
 function jesseHouse() {
   const g = new THREE.Group();
@@ -204,7 +272,7 @@ export function createTrees(houseLots) {
 
   const spots = [];
   let guard = 0;
-  while (spots.length < 46 && guard++ < 1200) {
+  while (spots.length < 64 && guard++ < 1600) {
     const x = -210 + rng() * 380;
     const z = -135 + rng() * 120;
     if (Math.abs(z - RES_ROAD_Z) < 8) continue; // street + sidewalks
@@ -353,6 +421,17 @@ export function createNeighborhood() {
     new THREE.Vector3(jx + 7, 7, jz + 5.6)
   ));
   lots.push({ x: jx, z: jz, halfW: 9, halfD: 13 });
+
+  // Hank & Marie's at the east end
+  const sx = 145, sz = RES_ROAD_Z - 26;
+  const schrader = schraderHouse();
+  schrader.position.set(sx, 0, sz);
+  group.add(schrader);
+  colliders.push(new THREE.Box3(
+    new THREE.Vector3(sx - 8, 0, sz - 5.2),
+    new THREE.Vector3(sx + 8, 5, sz + 5.2)
+  ));
+  lots.push({ x: sx, z: sz, halfW: 11, halfD: 13 });
 
   // Walter's lot (house built separately) so trees keep clear of it
   lots.push({ x: 0, z: -35, halfW: 18, halfD: 26 });
