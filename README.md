@@ -16,9 +16,25 @@ generated at runtime on canvas).
   pole sign included), **Saul Goodman & Associates** (inflatable Statue of
   Liberty wobbling on the roof, "BETTER CALL SAUL!" banner), the **A1A Car
   Wash** and the **Lavandería Brillante** industrial laundry.
+- **Crossroads Motel**, **the Dog House** drive-in (dachshund sign included)
+  and the **Schrader residence** (purple accents, Hank's grill and SUV).
 - **Tohajiilee Desert** — leave town on the dirt track to find the RV cook
   site: the 1986 Fleetwood Bounder, camp chairs, the methylamine barrel and a
-  fire ring, surrounded by dunes, saguaros and distant mesas.
+  fire ring, surrounded by dunes, saguaros and distant mesas. Somewhere out
+  there is a freshly dug hole at N 34° 59' 20" — W 106° 36' 52".
+
+## Interiors
+
+Three buildings are walkable:
+
+- **308 Negra Arroyo Lane** — through the ajar front door: living room with
+  couch and TV, dining set, the kitchen with its island (Heisenberg's
+  pork-pie hat is on it), and the open slider to the pool deck.
+- **Los Pollos Hermanos** — checkered dining room with booths, tables,
+  service counter, menu board and the fryer line.
+- **Lavandería Brillante** — the man door leads straight onto the superlab
+  floor: red epoxy, twin steel reaction vessels, yellow railings, lab benches
+  with glassware, and two yellow hazmat suits on the wall.
 
 ## Driving
 
