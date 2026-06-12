@@ -23,4 +23,6 @@ console.log('door walk  :', JSON.stringify(await tryWalk(2.1, -41.5)), '(should 
 console.log('wall walk  :', JSON.stringify(await tryWalk(6.0, -41.5)), '(should stop near z=-39.3)');
 console.log('pollos walk:', JSON.stringify(await tryWalk(208, 63)), '(should pass z > 67)');
 console.log('lab walk   :', JSON.stringify(await tryWalk(487, 73)), '(should pass z > 77)');
+console.log('saul walk  :', JSON.stringify(await tryWalk(70, 67)), '(should pass z > 71)');
+console.log('jesse walk :', JSON.stringify(await tryWalk(-187, -78)), '(should stop before z=-82, hits the couch zone... should at least pass z < -81)');
 await browser.close();

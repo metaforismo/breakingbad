@@ -14,6 +14,8 @@ const VIEWS = [
   { name: 'los-pollos', pos: [207, 2.0, 40], yaw: 3.1, pitch: 0.04 },
   { name: 'pollos-interior', pos: [208, 1.7, 68], yaw: 2.9, pitch: 0.0 },
   { name: 'saul', pos: [70, 2.0, 46], yaw: 3.14, pitch: 0.06 },
+  { name: 'saul-interior', pos: [70, 1.7, 71.5], yaw: 3.1, pitch: 0.0 },
+  { name: 'jesse-interior', pos: [-186.5, 1.7, -82.5], yaw: 0.3, pitch: 0.0 },
   { name: 'carwash', pos: [353, 2.0, 44], yaw: 3.1, pitch: 0.04 },
   { name: 'laundry', pos: [478, 2.5, 52], yaw: 3.14, pitch: 0.05 },
   { name: 'superlab', pos: [487, 1.7, 79], yaw: 2.05, pitch: 0.0 },

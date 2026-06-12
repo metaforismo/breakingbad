@@ -724,3 +724,29 @@ export function rectShadowTexture() {
     }
   });
 }
+
+/** Parchment mural for Saul's office back wall. */
+export function constitutionTexture() {
+  const rng = makeRng(123);
+  return makeTexture(512, (ctx, s, h) => {
+    ctx.fillStyle = '#dccb9f';
+    ctx.fillRect(0, 0, s, h);
+    blotches(ctx, s, rng, 12, 'rgba(184, 160, 110, 1)', 90);
+    ctx.fillStyle = '#5a4630';
+    ctx.font = 'italic bold 64px Georgia';
+    ctx.textAlign = 'left';
+    ctx.fillText('We the People', 26, 78);
+    // faint script lines
+    ctx.strokeStyle = 'rgba(90, 70, 48, 0.55)';
+    ctx.lineWidth = 2;
+    for (let y = 116; y < h - 16; y += 16) {
+      ctx.beginPath();
+      ctx.moveTo(24, y);
+      const len = s - 48 - rng() * 120;
+      for (let x = 24; x < 24 + len; x += 14) {
+        ctx.lineTo(x + 14, y + (rng() - 0.5) * 5);
+      }
+      ctx.stroke();
+    }
+  }, { w: 512, h: 224 });
+}

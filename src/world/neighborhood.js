@@ -9,10 +9,12 @@ import { makeRng } from '../utils/noise.js';
 import {
   stuccoTexture, stuccoBumpTexture, shingleTexture, brickTexture,
   concreteTexture, garageDoorTexture, lawnTexture, streetSignTexture,
-  riverRockTexture
+  riverRockTexture, woodFloorTexture
 } from '../utils/textures.js';
 import { hipRoof } from '../objects/house.js';
-import { contactShadow } from '../objects/furniture.js';
+import {
+  contactShadow, wallWithGap, glowWindow, couch, coffeeTable, tvUnit
+} from '../objects/furniture.js';
 import { createCar } from '../objects/cars.js';
 import {
   RES_ROAD_Z, MAIN_ROAD_Z, RES_ROAD_X_MIN, RES_ROAD_X_MAX, CONN_ROAD_X, TOWN
@@ -187,8 +189,9 @@ function schraderHouse() {
   return g;
 }
 
-/** Jesse's place: two-story with brick base and a columned porch. */
-function jesseHouse() {
+/** Jesse's place: two-story with brick base, columned porch and a messy,
+ *  walkable ground floor. addCollider receives LOCAL coords. */
+function jesseHouse(addCollider) {
   const g = new THREE.Group();
   const wallMat = new THREE.MeshStandardMaterial({
     map: stuccoTexture('#d9c9a8', '186, 162, 120'), bumpMap: bumpTex, bumpScale: 0.3, roughness: 0.95
@@ -197,12 +200,44 @@ function jesseHouse() {
   const brickMat = new THREE.MeshStandardMaterial({ map: brickTexture([3, 1]), roughness: 0.95 });
 
   const W = 13, D = 10, H = 5.6;
-  g.add(box(W, H, D, wallMat, 0, H / 2, 0));
-  g.add(box(W + 0.12, 1.3, D + 0.12, brickMat, 0, 0.65, 0)); // brick skirt
+  const GROUND_H = 2.75;
+  // ground floor: hollow shell with the front door gap at x=-2
+  wallWithGap(g, addCollider, wallMat, {
+    axis: 'x', from: -W / 2, to: W / 2, at: D / 2 - 0.13, h: GROUND_H, t: 0.26,
+    gapCenter: -2, gapWidth: 1.2, gapHeight: 2.2
+  });
+  wallWithGap(g, addCollider, wallMat, {
+    axis: 'x', from: -W / 2, to: W / 2, at: -D / 2 + 0.13, h: GROUND_H, t: 0.26
+  });
+  wallWithGap(g, addCollider, wallMat, {
+    axis: 'z', from: -D / 2, to: D / 2, at: -W / 2 + 0.13, h: GROUND_H, t: 0.26
+  });
+  wallWithGap(g, addCollider, wallMat, {
+    axis: 'z', from: -D / 2, to: D / 2, at: W / 2 - 0.13, h: GROUND_H, t: 0.26
+  });
+  // solid upper story
+  g.add(box(W, H - GROUND_H, D, wallMat, 0, GROUND_H + (H - GROUND_H) / 2, 0));
+  // brick skirt as runs so the doorway stays open
+  const noCollide = () => {};
+  wallWithGap(g, noCollide, brickMat, {
+    axis: 'x', from: -W / 2 - 0.06, to: W / 2 + 0.06, at: D / 2 + 0.03, h: 1.3, t: 0.1,
+    gapCenter: -2, gapWidth: 1.3, gapHeight: 1.3
+  });
+  wallWithGap(g, noCollide, brickMat, {
+    axis: 'x', from: -W / 2 - 0.06, to: W / 2 + 0.06, at: -D / 2 - 0.03, h: 1.3, t: 0.1
+  });
+  wallWithGap(g, noCollide, brickMat, {
+    axis: 'z', from: -D / 2, to: D / 2, at: -W / 2 - 0.03, h: 1.3, t: 0.1
+  });
+  wallWithGap(g, noCollide, brickMat, {
+    axis: 'z', from: -D / 2, to: D / 2, at: W / 2 + 0.03, h: 1.3, t: 0.1
+  });
+
   const roof = hipRoof(W + 1.6, D + 1.6, 2.2, roofMat);
   roof.position.set(0, H, 0);
   g.add(roof);
   g.add(box(W + 1.7, 0.18, D + 1.7, trimWhite, 0, H - 0.04, 0, false));
+  g.add(contactShadow(W, D, 0, 0));
 
   // porch with columns
   g.add(box(5.4, 0.18, 2.4, brickMat, -2, 0.09, D / 2 + 1.2));
@@ -213,9 +248,88 @@ function jesseHouse() {
     col.castShadow = true;
     g.add(col);
   }
-  // red front door
-  g.add(box(1.1, 2.15, 0.1, new THREE.MeshStandardMaterial({ color: 0x7e2218, roughness: 0.55 }),
-    -2, 1.07, D / 2 + 0.02));
+  // red front door, ajar
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(-2.58, 0, D / 2 - 0.08);
+  doorPivot.add(box(1.12, 2.15, 0.07,
+    new THREE.MeshStandardMaterial({ color: 0x7e2218, roughness: 0.55 }), 0.56, 1.07, 0));
+  doorPivot.rotation.y = -1.1;
+  g.add(doorPivot);
+
+  // ---- the messy ground floor ------------------------------------------
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: woodFloorTexture([4, 3]), color: 0xb59a78, roughness: 0.85
+  });
+  g.add(box(W - 0.4, 0.1, D - 0.4, floorMat, 0, 0.0, 0, false));
+  g.add(box(W - 0.4, 0.1, D - 0.4, new THREE.MeshStandardMaterial({
+    color: 0xd8d2c2, roughness: 0.95
+  }), 0, GROUND_H - 0.12, 0, false)); // ceiling
+  const jesseLight = new THREE.PointLight(0xffdfae, 14, 13, 1.8);
+  jesseLight.position.set(0, 2.3, 0);
+  g.add(jesseLight);
+
+  // two mismatched couches around a junk-covered coffee table, big TV
+  const sofaRed = couch(2.2);
+  sofaRed.children.forEach((c) => {
+    c.material = new THREE.MeshStandardMaterial({ color: 0x7e3a30, roughness: 1 });
+  });
+  sofaRed.position.set(-2.5, 0.06, -3.6);
+  g.add(sofaRed);
+  addCollider(-3.7, -4.2, -1.3, -3.0);
+  const sofaGreen = couch(1.8);
+  sofaGreen.children.forEach((c) => {
+    c.material = new THREE.MeshStandardMaterial({ color: 0x4e5e3e, roughness: 1 });
+  });
+  sofaGreen.position.set(-5.4, 0.06, -1);
+  sofaGreen.rotation.y = Math.PI / 2;
+  g.add(sofaGreen);
+  addCollider(-6.0, -2.0, -4.8, 0.0);
+  const ct = coffeeTable();
+  ct.position.set(-2.5, 0.06, -1.6);
+  g.add(ct);
+  const tv = tvUnit();
+  tv.position.set(-2.5, 0.06, 0.9);
+  tv.rotation.y = Math.PI;
+  g.add(tv);
+  addCollider(-3.3, 0.6, -1.7, 1.3);
+  // pizza box + bottles on the table
+  g.add(box(0.5, 0.05, 0.5, new THREE.MeshStandardMaterial({
+    color: 0xc9b282, roughness: 0.9 }), -2.7, 0.48, -1.5, false));
+  for (const [bx2, bz2] of [[-2.2, -1.7], [-2.35, -1.45], [-2.1, -1.4]]) {
+    const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.2, 8),
+      new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.2 }));
+    bottle.position.set(bx2, 0.55, bz2);
+    g.add(bottle);
+  }
+  // second pizza box on the floor, open
+  g.add(box(0.5, 0.04, 0.5, new THREE.MeshStandardMaterial({
+    color: 0xb8a070, roughness: 0.9 }), 1.6, 0.07, -2.8, false));
+
+  // stairs up along the east wall (blocked off — rooms upstairs)
+  const stepMat = new THREE.MeshStandardMaterial({ color: 0x8a6840, roughness: 0.8 });
+  for (let i = 0; i < 9; i++) {
+    g.add(box(1.05, 0.18, 0.27, stepMat, 5.7, 0.15 + i * 0.29, 3.4 - i * 0.27));
+  }
+  const stairHole = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2.8),
+    new THREE.MeshBasicMaterial({ color: 0x0e0b08 }));
+  stairHole.rotation.x = Math.PI / 2;
+  stairHole.position.set(5.7, GROUND_H - 0.18, 2.2);
+  g.add(stairHole);
+  addCollider(5.0, 0.6, 6.35, 4.0);
+  // banister
+  g.add(box(0.06, 1.0, 2.6, stepMat, 5.1, 1.4, 2.2, false));
+
+  // glowing windows from inside
+  for (const wx of [-4.4, 3.8]) {
+    const glow = glowWindow(1.4, 1.2);
+    glow.position.set(wx, 1.8, D / 2 - 0.28);
+    glow.rotation.y = Math.PI;
+    g.add(glow);
+  }
+  const sideGlow = glowWindow(1.3, 1.1);
+  sideGlow.position.set(-W / 2 + 0.28, 1.7, -1);
+  sideGlow.rotation.y = Math.PI / 2;
+  g.add(sideGlow);
 
   // window grid
   for (const wy of [1.8, 4.3]) {
@@ -411,15 +525,17 @@ export function createNeighborhood() {
     lots.push({ x: hx, z: RES_ROAD_Z + 25, halfW: hw + 3, halfD: hd + 8 });
   });
 
-  // Jesse's house at the west end of the lane
+  // Jesse's house at the west end of the lane (interior colliders in local
+  // coords, translated to world here — the group is not rotated)
   const jx = -185, jz = RES_ROAD_Z - 26;
-  const jesse = jesseHouse();
+  const jesse = jesseHouse((minX, minZ, maxX, maxZ, h = 4) => {
+    colliders.push(new THREE.Box3(
+      new THREE.Vector3(jx + minX, 0, jz + minZ),
+      new THREE.Vector3(jx + maxX, h, jz + maxZ)
+    ));
+  });
   jesse.position.set(jx, 0, jz);
   group.add(jesse);
-  colliders.push(new THREE.Box3(
-    new THREE.Vector3(jx - 7, 0, jz - 5.6),
-    new THREE.Vector3(jx + 7, 7, jz + 5.6)
-  ));
   lots.push({ x: jx, z: jz, halfW: 9, halfD: 13 });
 
   // Hank & Marie's at the east end

@@ -9,12 +9,12 @@ import {
   corrugatedTexture, rollupDoorTexture, losPollosLogoTexture,
   a1aSignTexture, saulBannerTexture, lavanderiaSignTexture, carWashWallTexture,
   checkerTileTexture, epoxyFloorTexture, hazardStripeTexture, menuBoardTexture,
-  motelSignTexture, dogHouseSignTexture
+  motelSignTexture, dogHouseSignTexture, constitutionTexture
 } from '../utils/textures.js';
 import { carPresets } from '../objects/cars.js';
 import {
   wallWithGap, contactShadow, ceilingFixture, roundTable, dinerChair,
-  flask, steelMat, blackMat, whiteGoodsMat
+  flask, steelMat, blackMat, whiteGoodsMat, chair, darkWoodMat
 } from '../objects/furniture.js';
 
 const glassMat = new THREE.MeshStandardMaterial({
@@ -360,10 +360,97 @@ function saulOffice(colliders) {
   const wallMat = new THREE.MeshStandardMaterial({
     map: stuccoTexture('#d9c8a4', '182, 160, 122'), bumpMap: bumpTex, bumpScale: 0.3, roughness: 0.95
   });
-  g.add(box(W, H, D, wallMat, X, H / 2, Z));
-  addC(X - W / 2, Z - D / 2, X + W / 2, Z + D / 2, 6);
+  // three units; the middle one (Saul's) is hollow and enterable
+  const F = Z - D / 2, B = Z + D / 2;
+  const ML = X - 5.7, MR = X + 5.7;
+  g.add(box(11.3, H, D, wallMat, (X - W / 2 + ML) / 2, H / 2, Z));
+  addC(X - W / 2, F, ML, B, 6);
+  g.add(box(11.3, H, D, wallMat, (MR + X + W / 2) / 2, H / 2, Z));
+  addC(MR, F, X + W / 2, B, 6);
+  // Saul's unit shell: back wall, partitions, header over the storefront
+  g.add(box(11.6, H, 0.3, wallMat, X, H / 2, B - 0.15));
+  addC(ML, B - 0.3, MR, B);
+  g.add(box(0.26, H, D - 0.2, wallMat, ML + 0.13, H / 2, Z));
+  g.add(box(0.26, H, D - 0.2, wallMat, MR - 0.13, H / 2, Z));
+  g.add(box(11.6, H - 2.7, 0.26, wallMat, X, (H + 2.7) / 2, F + 0.13, false));
+  g.add(box(11.6, 0.36, 0.26, mullionMat, X, 0.18, F + 0.13, false));
+  // colliders along the glass, leaving the doorway at X open
+  addC(ML, F - 0.1, X - 0.95, F + 0.2);
+  addC(X + 0.95, F - 0.1, MR, F + 0.2);
   g.add(box(W + 0.4, 0.5, D + 0.4, whiteMat, X, H + 0.2, Z, false));
+  g.add(box(W - 0.5, 0.14, D - 0.5, whiteMat, X, H - 0.05, Z, false)); // roof slab
   g.add(contactShadow(W, D, X, Z));
+
+  // ---- Saul's office interior ------------------------------------------
+  const carpet = new THREE.Mesh(
+    new THREE.PlaneGeometry(11, D - 0.6),
+    new THREE.MeshStandardMaterial({ color: 0x9a8468, roughness: 1 })
+  );
+  carpet.rotation.x = -Math.PI / 2;
+  carpet.position.set(X, 0.06, Z);
+  carpet.receiveShadow = true;
+  g.add(carpet);
+  g.add(box(11.2, 0.1, D - 0.5, whiteMat, X, 3.16, Z, false)); // ceiling
+  g.add(ceilingFixture(1.8, 0.6, X - 2.5, 3.1, Z - 1));
+  g.add(ceilingFixture(1.8, 0.6, X + 2.5, 3.1, Z - 1));
+  const saulLight = new THREE.PointLight(0xffeccc, 18, 18, 1.8);
+  saulLight.position.set(X, 2.8, Z - 0.5);
+  g.add(saulLight);
+
+  // the constitution mural behind the big desk
+  const mural = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.2, 2.5),
+    new THREE.MeshBasicMaterial({ map: constitutionTexture() })
+  );
+  mural.position.set(X, 1.65, B - 0.32);
+  mural.rotation.y = Math.PI;
+  g.add(mural);
+  // white columns flanking the desk (Saul's idea of class)
+  for (const cx of [X - 3.2, X + 3.2]) {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 3.0, 14), whiteMat);
+    col.position.set(cx, 1.5, B - 1.1);
+    col.castShadow = true;
+    g.add(col);
+  }
+  // the desk, his tall chair, two client chairs
+  g.add(box(2.8, 0.78, 1.15, darkWoodMat, X, 0.45, B - 2.4));
+  g.add(box(2.6, 0.1, 1.0, new THREE.MeshStandardMaterial({
+    color: 0x2e4a2e, roughness: 0.4 }), X, 0.84, B - 2.4, false));
+  addC(X - 1.45, B - 3.0, X + 1.45, B - 1.8, 1);
+  const tallChair = new THREE.Group();
+  tallChair.add(box(0.6, 0.12, 0.55, blackMat, 0, 0.55, 0));
+  tallChair.add(box(0.6, 1.0, 0.14, blackMat, 0, 1.1, -0.26));
+  tallChair.add(box(0.1, 0.5, 0.1, steelMat, 0, 0.27, 0, false));
+  tallChair.position.set(X, 0, B - 1.35);
+  g.add(tallChair);
+  g.add(chair(X - 0.85, B - 3.6, 0));
+  g.add(chair(X + 0.85, B - 3.6, 0));
+
+  // reception desk + waiting chairs by the entrance
+  g.add(box(2.0, 0.95, 0.7, darkWoodMat, X - 3.4, 0.52, F + 2.2));
+  addC(X - 4.4, F + 1.85, X - 2.4, F + 2.55, 1.1);
+  g.add(chair(X - 3.4, F + 3.1, Math.PI));
+  for (let i = 0; i < 3; i++) {
+    g.add(chair(X + 2.2 + i * 0.75, F + 1.3, Math.PI));
+  }
+  // potted plant + framed diplomas
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.18, 0.4, 10),
+    new THREE.MeshStandardMaterial({ color: 0x8a4a2e, roughness: 0.9 }));
+  pot.position.set(X + 4.8, 0.26, B - 1.0);
+  g.add(pot);
+  const plant = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 1),
+    new THREE.MeshStandardMaterial({ color: 0x3e6b32, roughness: 1, flatShading: true }));
+  plant.position.set(X + 4.8, 0.85, B - 1.0);
+  plant.castShadow = true;
+  g.add(plant);
+  for (const dz of [Z - 1.5, Z - 0.4, Z + 0.7]) {
+    g.add(box(0.04, 0.55, 0.45, darkWoodMat, MR - 0.3, 1.9, dz, false));
+    const diploma = new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.46),
+      new THREE.MeshBasicMaterial({ color: 0xf2eedd }));
+    diploma.position.set(MR - 0.33, 1.9, dz);
+    diploma.rotation.y = -Math.PI / 2;
+    g.add(diploma);
+  }
 
   g.add(box(W + 0.4, 0.22, 3.2, whiteMat, X, 3.2, Z - D / 2 - 1.6));
   for (let i = 0; i < 8; i++) {
