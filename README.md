@@ -6,6 +6,25 @@ A Three.js open-world fan game. Walk and drive through the iconic places of
 the series, rebuilt procedurally (no external assets — every texture is
 generated at runtime on canvas).
 
+![308 Negra Arroyo Lane — the White residence](docs/screenshots/house-front.png)
+
+## Screenshots
+
+| | |
+|:--:|:--:|
+| ![The living room inside 308](docs/screenshots/house-living.png) | ![The kitchen and island](docs/screenshots/house-kitchen.png) |
+| *Walk inside the White house...* | *...past the kitchen island* |
+| ![Backyard pool with the teddy bear](docs/screenshots/pool.png) | ![Negra Arroyo Lane](docs/screenshots/street.png) |
+| *The backyard pool* | *The suburban street* |
+| ![Los Pollos Hermanos](docs/screenshots/los-pollos.png) | ![The Los Pollos dining room](docs/screenshots/pollos-interior.png) |
+| *Los Pollos Hermanos* | *...and its dining room* |
+| ![The superlab](docs/screenshots/superlab.png) | ![Saul Goodman's office](docs/screenshots/saul-interior.png) |
+| *The superlab under the laundry* | *Saul Goodman's office* |
+| ![A1A Car Wash](docs/screenshots/carwash.png) | ![Crossroads Motel](docs/screenshots/motel.png) |
+| *A1A Car Wash* | *Crossroads Motel* |
+| ![The RV cook site](docs/screenshots/rv-site.png) | |
+| *The RV cook site in the Tohajiilee desert* | |
+
 ## Locations
 
 - **308 Negra Arroyo Lane** — the White residence: cream stucco, maroon trim,
